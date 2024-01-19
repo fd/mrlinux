@@ -28,6 +28,24 @@
           lxc-import-image = lxc-import-image;
 
           install-extended-os = pkgs.writeShellScriptBin "install-extended-os" (builtins.readFile ./scripts/install-extended-os.sh);
+
+          dummy-system-for-cache = (self.lib.mrlinuxSystem {
+            format = "lxc";
+            system = system;
+            modules = [
+              {
+                networking.hostName = "mrlinux";
+                developer = {
+                  username = "dummy";
+                  uid = 1000;
+                  gid = 1000;
+                  sshKeys = [
+                    "ssh-ed25519 AAAAC"
+                  ];
+                };
+              }
+            ];
+          }).config.system.build.toplevel;
         };
       }
     ) // {

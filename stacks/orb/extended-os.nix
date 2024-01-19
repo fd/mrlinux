@@ -8,6 +8,7 @@ nixpkgs.lib.nixosSystem {
       ../../modules/nix/settings.nix
       ../../modules/non-nix-support/default.nix
       ../../modules/developer.nix
+      ../../modules/basictools.nix
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 
@@ -15,10 +16,7 @@ nixpkgs.lib.nixosSystem {
           GH_BROWSER = "x-www-browser";
         };
 
-        environment.systemPackages = with pkgs; [
-          vim
-          git
-
+        environment.systemPackages = [
           # Install the _open a browser_ tools
           (pkgs.writeShellScriptBin "x-www-browser" ''
             echo "Opening $@" > /dev/stderr

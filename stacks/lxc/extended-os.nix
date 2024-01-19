@@ -8,6 +8,7 @@ nixpkgs.lib.nixosSystem {
       ../../modules/nix/settings.nix
       ../../modules/non-nix-support/default.nix
       ../../modules/developer.nix
+      ../../modules/basictools.nix
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 
@@ -40,11 +41,6 @@ nixpkgs.lib.nixosSystem {
           enable = true;
           settings.PasswordAuthentication = false;
         };
-
-        environment.systemPackages = with pkgs; [
-          vim
-          git
-        ];
       })
     ] ++ modules;
 }
