@@ -84,7 +84,7 @@ function init_linux {
     ssh-keyscan -H "$(lxc_ip_address "$containerName")" >> "$HOME/.ssh/known_hosts"
 
     # Install the extended OS
-    lxc exec "$containerName" -- nix rrun \
+    lxc exec "$containerName" -- nix run \
       --extra-experimental-features "nix-command flakes" \
       --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
       --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
@@ -98,6 +98,11 @@ function init_linux {
     while [[ -z "$(lxc_ip_address "$containerName")" ]]; do
         sleep 1
     done
+
+    # Install the Home Manager configuration
+    ssh "$username@$(lxc_ip_address "$containerName")" nix run github:mrhenry/home-manager \
+        --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+        --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
 }
 
 function init_macos {
@@ -115,6 +120,11 @@ function init_macos {
     
     # Restart the container to apply the changes
     orbctl restart "$containerName"
+
+    # Install the Home Manager configuration
+    ssh "$username@$containerName@orb" nix run github:mrhenry/home-manager \
+        --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+        --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
 }
 
 function run_create {
