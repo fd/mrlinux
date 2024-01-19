@@ -17,9 +17,9 @@
 # Usage
 
 ```
-mrlinuxctl create [<name>]
-mrlinuxctl delete [<name>]
-mrlinuxctl reset [<name>]
-mrlinuxctl restart [<name>]
-mrlinuxctl code [-m <name>] [path]
+mrlinuxctl create [<machine>]
+mrlinuxctl delete [<machine>]
+mrlinuxctl reset [<machine>]
+mrlinuxctl restart [<machine>]
+mrlinuxctl code [-m <machine>] [path]
 ```
