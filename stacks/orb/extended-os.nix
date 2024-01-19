@@ -11,17 +11,6 @@ nixpkgs.lib.nixosSystem {
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 
-        # users.groups.${config.developer.username} = {
-        #   gid = config.developer.gid;
-        # };
-        # users.users.${config.developer.username} = {
-        #   uid = config.developer.uid;
-        #   group = config.developer.username;
-        #   isNormalUser = true;
-        #   extraGroups = [ "wheel" ];
-        #   openssh.authorizedKeys.keys = config.developer.sshKeys;
-        # };
-
         environment.variables = {
           GH_BROWSER = "x-www-browser";
         };

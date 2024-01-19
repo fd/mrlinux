@@ -56,7 +56,7 @@ cat <<EOF > /etc/nixos/flake.nix
 
   outputs = { self, mrlinux }:
     {
-      nixosConfigurations.mrlinux = mrlinux.lib.mrlinuxSystem {
+      nixosConfigurations.$tmpl_containerName = mrlinux.lib.mrlinuxSystem {
         format = "orb";
         system = "$nixSystem";
 
@@ -90,7 +90,7 @@ cat <<EOF > /etc/nixos/flake.nix
 
   outputs = { self, mrlinux }:
     {
-      nixosConfigurations.mrlinux = mrlinux.lib.mrlinuxSystem {
+      nixosConfigurations.$tmpl_containerName = mrlinux.lib.mrlinuxSystem {
         format = "lxc";
         system = "$nixSystem";
 
@@ -127,4 +127,4 @@ cat <<EOF > /etc/nixos/modules/developer.nix
 }
 EOF
 
-nixos-rebuild switch --flake /etc/nixos#mrlinux
+nixos-rebuild switch --flake /etc/nixos#$tmpl_containerName
