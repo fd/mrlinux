@@ -21,5 +21,5 @@ mrlinuxctl create [<machine>]
 mrlinuxctl delete [<machine>]
 mrlinuxctl reset [<machine>]
 mrlinuxctl restart [<machine>]
-mrlinuxctl code [-m <machine>] [path]
+mrlinuxctl code [-m <machine>] [-w] [path..]
 ```

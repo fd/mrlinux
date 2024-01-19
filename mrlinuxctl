@@ -212,33 +212,64 @@ function run_restart {
 }
 
 function run_code {
-    # If the first argument is -m, set the container name to the second argument or default to "mrlinux"
-    if [ "$1" == "-m" ]; then
-        shift
-        local containerName="$1"
-        shift
+    # Setup paths as an empty list
+    local paths=()
 
-        # containerName is set
-        if [ -z "$containerName" ]; then
-            echo "Missing container name" > /dev/stderr
-            bail_with_usage
-        fi
-    else
+    # Loop over arguments
+    while [ "$#" -gt "0" ]; do
+        case "$1" in
+            -m)
+                shift
+                local containerName="$1"
+                shift
+
+                # containerName is set
+                if [ -z "$containerName" ]; then
+                    echo "Missing container name" > /dev/stderr
+                    bail_with_usage
+                fi
+                ;;
+            -w)
+                local wait="true"
+                shift
+                ;;
+            *)
+                # Append the path to the list of paths
+                paths+=("$(realpath "$1")")
+                shift
+                ;;
+        esac
+    done
+
+    # if containerName is not set, set it to "mrlinux"
+    if [ -z "$containerName" ]; then
         local containerName="mrlinux"
     fi
 
-    # Set the path to the first argument or default to the current directory
-    local path="${1:-.}"
+    # If paths is empty append the current directory
+    if [ "${#paths[@]}" == "0" ]; then
+        paths+=("$(realpath .)")
+    fi
 
-    # Resolve the path
-    local resolvedPath="$(realpath "$path")"
+    # Let args be an empty list
+    local args=()
+
+    # If wait is true append the --wait flag
+    if [ "$wait" == "true" ]; then
+        args+=("--wait")
+    fi
+
+    # Append all the paths to args
+    for path in "${paths[@]}"; do
+        args+=("$path")
+    done
 
     case "$system" in
         Linux)
-            exec code --remote "ssh-remote+$USER@$(lxc_ip_address "$containerName")" "$resolvedPath"
+            exec code --remote "ssh-remote+$USER@$(lxc_ip_address "$containerName")" "${args[@]}"
             ;;
         Darwin)
-            exec code --remote "ssh-remote+$USER@$containerName@orb" "$resolvedPath"
+            exec code --remote "ssh-remote+$USER@$containerName@orb" "${args[@]}"
             ;;
         *)
             echo "Unsupported system: $system" > /dev/stderr
@@ -250,11 +281,11 @@ function run_code {
 collect_system_type
 
 function bail_with_usage {
-    echo "mrlinuxctl create [<name>]"
-    echo "mrlinuxctl delete [<name>]"
-    echo "mrlinuxctl reset [<name>]"
-    echo "mrlinuxctl restart [<name>]"
-    echo "mrlinuxctl code [-m=<name>] [path]"
+    echo "mrlinuxctl create [<machine>]"
+    echo "mrlinuxctl delete [<machine>]"
+    echo "mrlinuxctl reset [<machine>]"
+    echo "mrlinuxctl restart [<machine>]"
+    echo "mrlinuxctl code [-m <machine>] [-w] [path]"
     exit 1
 }
 
