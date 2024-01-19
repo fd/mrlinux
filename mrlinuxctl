@@ -79,11 +79,11 @@ function init_linux {
     done
 
     # Install the extended OS
-    # lxc exec "$containerName" -- nix run github:fd/mrlinux#install-extended-os \
-    #   --extra-experimental-features "nix-command flakes" \
-    #   --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-    #   --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
-    #   -- --format="lxc" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+    lxc exec "$containerName" -- nix run github:fd/mrlinux#install-extended-os \
+      --extra-experimental-features "nix-command flakes" \
+      --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+      --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+      -- --container-name "$containerName" --format "lxc" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
 }
 
 function init_macos {
@@ -92,11 +92,11 @@ function init_macos {
     orbctl create nixos "$containerName"
 
     # Install the extended OS
-    # orb run -m "$containerName" -u root -- nix run github:fd/mrlinux#install-extended-os \
-    #   --extra-experimental-features "nix-command flakes" \
-    #   --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-    #   --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
-    #   -- --format="orb" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+    orb run -m "$containerName" -u root -- nix run github:fd/mrlinux#install-extended-os \
+      --extra-experimental-features "nix-command flakes" \
+      --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+      --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+      -- --container-name "$containerName" --format "orb" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
 }
 
 function run_create {
@@ -188,7 +188,7 @@ function run_code {
         local containerName="$1"
         shift
 
-        # conatinerName is set
+        # containerName is set
         if [ -z "$containerName" ]; then
             echo "Missing container name" > /dev/stderr
             bail_with_usage

@@ -41,6 +41,7 @@ if [ -z "$tmpl_containerName" ] || [ -z "$tmpl_format" ] || [ -z "$tmpl_username
 fi
 
 nixSystem="$(nix show-config | grep 'system =' | sed 's|system = ||')"
+mkdir -p /etc/nixos/modules
 
 case "$tmpl_format" in
     orb)
