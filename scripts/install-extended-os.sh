@@ -1,5 +1,7 @@
 set -e
 
+export NIX_CONFIG="experimental-features = nix-command flakes"
+
 # Take arguments from command line
 while [ "$#" -gt "0" ]; do
     case "$1" in
