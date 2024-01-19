@@ -9,6 +9,7 @@ nixpkgs.lib.nixosSystem {
       ../../modules/non-nix-support/default.nix
       ../../modules/developer.nix
       ../../modules/basictools.nix
+      ../../modules/mrlinux/updater.nix
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 
