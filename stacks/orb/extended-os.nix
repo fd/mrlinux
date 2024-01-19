@@ -22,9 +22,19 @@ nixpkgs.lib.nixosSystem {
         #   openssh.authorizedKeys.keys = config.developer.sshKeys;
         # };
 
+        environment.variables = {
+          GH_BROWSER = "x-www-browser";
+        };
+
         environment.systemPackages = with pkgs; [
           vim
           git
+
+          # Install the _open a browser_ tools
+          (pkgs.writeShellScriptBin "x-www-browser" ''
+            echo "Opening $@" > /dev/stderr
+            exec mac open "$@"
+          '')
         ];
       })
     ] ++ modules;
