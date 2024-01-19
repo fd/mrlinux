@@ -84,10 +84,11 @@ function init_linux {
     ssh-keyscan -H "$(lxc_ip_address "$containerName")" >> "$HOME/.ssh/known_hosts"
 
     # Install the extended OS
-    lxc exec "$containerName" -- nix run github:fd/mrlinux#install-extended-os \
+    lxc exec "$containerName" -- nix rrun \
       --extra-experimental-features "nix-command flakes" \
       --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
       --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+      github:fd/mrlinux#install-extended-os \
       -- --container-name "$containerName" --format "lxc" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
 
     # Restart the container to apply the changes
@@ -105,10 +106,11 @@ function init_macos {
     orbctl create nixos "$containerName"
 
     # Install the extended OS
-    orb run -m "$containerName" -u root nix run github:fd/mrlinux#install-extended-os \
+    orb run -m "$containerName" -u root nix run \
       --extra-experimental-features "nix-command flakes" \
       --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
       --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+      github:fd/mrlinux#install-extended-os \
       -- --container-name "$containerName" --format "orb" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
     
     # Restart the container to apply the changes
