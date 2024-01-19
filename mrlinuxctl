@@ -229,9 +229,21 @@ function run_code {
                     bail_with_usage
                 fi
                 ;;
-            -w)
+            -w|--wait)
                 local wait="true"
                 shift
+                ;;
+            -n|--new-window)
+                local newWindow="true"
+                shift
+                ;;
+            -r|--reuse-window)
+                local reuseWindow="true"
+                shift
+                ;;
+            -*)
+                echo "Unknown flag: $1" > /dev/stderr
+                bail_with_usage
                 ;;
             *)
                 # Append the path to the list of paths
@@ -257,6 +269,16 @@ function run_code {
     # If wait is true append the --wait flag
     if [ "$wait" == "true" ]; then
         args+=("--wait")
+    fi
+
+    # If newWindow is true append the --new-window flag
+    if [ "$newWindow" == "true" ]; then
+        args+=("--new-window")
+    fi
+
+    # If reuseWindow is true append the --reuse-window flag
+    if [ "$reuseWindow" == "true" ]; then
+        args+=("--reuse-window")
     fi
 
     # Append all the paths to args
@@ -285,7 +307,7 @@ function bail_with_usage {
     echo "mrlinuxctl delete [<machine>]"
     echo "mrlinuxctl reset [<machine>]"
     echo "mrlinuxctl restart [<machine>]"
-    echo "mrlinuxctl code [-m <machine>] [-w] [path]"
+    echo "mrlinuxctl code [-m <machine>] [-w|--wait] [-n|--new-window] [-r|--reuse-window] [path...]"
     exit 1
 }
 
