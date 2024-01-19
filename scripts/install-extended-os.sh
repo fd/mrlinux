@@ -1,6 +1,5 @@
 set -e
 
-
 # Take arguments from command line
 while [ "$#" -gt "0" ]; do
     case "$1" in
@@ -59,7 +58,7 @@ if [ -z "$tmpl_containerName" ] || [ -z "$tmpl_format" ] || [ -z "$tmpl_username
     exit 1
 fi
 
-export NIX_CONFIG="$(cat <<-EOF
+export NIX_CONFIG="$(cat <<EOF
 experimental-features = nix-command flakes
 extra-substituters = ${MRLINUX_CACHE_URL}
 extra-trusted-public-keys = ${MRLINUX_CACHE_KEY}
