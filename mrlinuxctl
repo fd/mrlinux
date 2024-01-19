@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+set -e
+
+function collect_system_type {
+    system="$(uname)"
+}
+
+function collect_environment_info_macos {
+    username="$USER"
+    uid="$(id -u)"
+    gid="$uid"
+    if [[ -d ~/.ssh ]]; then
+        sshKeys="$(find ~/.ssh -name 'id_*.pub' -exec cat {} \; | awk '{print "\"" $1 " " $2 "\""}')"
+    else
+        echo "No SSH keys found" > /dev/stderr
+        exit 1
+    fi
+}
+
+function collect_environment_info_linux {
+    username="$USER"
+    uid="$(id -u)"
+    gid="$(id -g)"
+    if [[ -d ~/.ssh ]]; then
+        sshKeys="$(find ~/.ssh -name 'id_*.pub' -exec cat {} \; | awk '{print "\"" $1 " " $2 "\""}')"
+    else
+        echo "No SSH keys found" > /dev/stderr
+        exit 1
+    fi
+}
+
+function test_system_linux {
+    # Make sue LXD is installed
+    if ! command -v lxd > /dev/null; then
+        echo "LXD is not installed" > /dev/stderr
+        exit 1
+    fi
+
+    # Make sure LXC is installed
+    if ! command -v lxc > /dev/null; then
+        echo "LXC is not installed" > /dev/stderr
+        exit 1
+    fi
+
+    # Make sure Nix is installed
+    if ! command -v nix > /dev/null; then
+        echo "Nix is not installed" > /dev/stderr
+        exit 1
+    fi
+}
+
+function test_system_macos {
+    # Make sure OrbStack is installed (orb command)
+    if ! command -v orb > /dev/null; then
+        echo "OrbStack is not installed" > /dev/stderr
+        exit 1
+    fi
+}
+
+function lxc_ip_address {
+    local containerName="$1"
+    lxc list -c 4 -f compact name="$containerName" | tail -1 | sed 's|(.*)||' | awk '{print $1}'
+}
+
+function init_linux {
+    local containerName="$1"
+
+    nix run .#lxc-import-image || true
+
+    lxc init mrlinux "$containerName" -c security.nesting=true -c security.privileged=true
+    lxc config device add "$containerName" host-home disk source=$HOME path=/host$HOME shift=true readonly=true
+    lxc config device add "$containerName" user-src disk source=$HOME/src path=$HOME/src shift=true
+    
+    lxc start "$containerName"
+
+    # Wait for IP address to be assigned
+    while [[ -z "$(lxc_ip_address "$containerName")" ]]; do
+        sleep 1
+    done
+
+    # Install the extended OS
+    # lxc exec "$containerName" -- nix run github:fd/mrlinux#install-extended-os \
+    #   --extra-experimental-features "nix-command flakes" \
+    #   --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+    #   --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+    #   -- --format="lxc" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+}
+
+function init_macos {
+    local containerName="$1"
+
+    orbctl create nixos "$containerName"
+
+    # Install the extended OS
+    # orb run -m "$containerName" -u root -- nix run github:fd/mrlinux#install-extended-os \
+    #   --extra-experimental-features "nix-command flakes" \
+    #   --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
+    #   --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
+    #   -- --format="orb" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+}
+
+function run_create {
+    # Make sure at most one argument is passed
+    if [ "$#" -gt "1" ]; then
+        echo "Too many arguments" > /dev/stderr
+        bail_with_usage
+    fi
+
+    # Set container name to the first argument or default to "mrlinux"
+    local containerName="${1:-mrlinux}"
+
+    echo "System: $system" > /dev/stderr
+    case "$system" in
+        Linux)
+            collect_environment_info_linux
+            test_system_linux
+            init_linux "$containerName"
+            ;;
+        Darwin)
+            collect_environment_info_macos
+            test_system_macos
+            init_macos "$containerName"
+            ;;
+        *)
+            echo "Unsupported system: $system" > /dev/stderr
+            exit 1
+            ;;
+    esac
+}
+
+function run_delete {
+    # Make sure at most one argument is passed
+    if [ "$#" -gt "1" ]; then
+        echo "Too many arguments" > /dev/stderr
+        bail_with_usage
+    fi
+
+    # Set container name to the first argument or default to "mrlinux"
+    local containerName="${1:-mrlinux}"
+
+    case "$system" in
+        Linux)
+            lxc delete "$containerName" -f
+            ;;
+        Darwin)
+            orbctl delete "$containerName"
+            ;;
+        *)
+            echo "Unsupported system: $system" > /dev/stderr
+            exit 1
+            ;;
+    esac
+}
+
+function run_restart {
+    # Make sure at most one argument is passed
+    if [ "$#" -gt "1" ]; then
+        echo "Too many arguments" > /dev/stderr
+        bail_with_usage
+    fi
+
+    # Set container name to the first argument or default to "mrlinux"
+    local containerName="${1:-mrlinux}"
+
+    case "$system" in
+        Linux)
+            lxc restart "$containerName" -f
+
+            # Wait for IP address to be assigned
+            while [[ -z "$(lxc_ip_address "$containerName")" ]]; do
+                sleep 1
+            done
+            ;;
+        Darwin)
+            orbctl restart "$containerName"
+            ;;
+        *)
+            echo "Unsupported system: $system" > /dev/stderr
+            exit 1
+            ;;
+    esac
+}
+
+function run_code {
+    # If the first argument is -m, set the container name to the second argument or default to "mrlinux"
+    if [ "$1" == "-m" ]; then
+        shift
+        local containerName="$1"
+        shift
+
+        # conatinerName is set
+        if [ -z "$containerName" ]; then
+            echo "Missing container name" > /dev/stderr
+            bail_with_usage
+        fi
+    else
+        local containerName="mrlinux"
+    fi
+
+    # Set the path to the first argument or default to the current directory
+    local path="${1:-.}"
+
+    # Resolve the path
+    local resolvedPath="$(realpath "$path")"
+
+    case "$system" in
+        Linux)
+            exec code --remote "ssh-remote+$USER@$(lxc_ip_address "$containerName")" "$resolvedPath"
+            ;;
+        Darwin)
+            exec code --remote "ssh-remote+$USER@$containerName@orb" "$resolvedPath"
+            ;;
+        *)
+            echo "Unsupported system: $system" > /dev/stderr
+            exit 1
+            ;;
+    esac
+}
+
+collect_system_type
+
+function bail_with_usage {
+    echo "mrlinuxctl create [<name>]"
+    echo "mrlinuxctl delete [<name>]"
+    echo "mrlinuxctl reset [<name>]"
+    echo "mrlinuxctl restart [<name>]"
+    echo "mrlinuxctl code [-m=<name>] [path]"
+    exit 1
+}
+
+if [ "$#" == "0" ]; then
+    bail_with_usage
+fi
+case "$1" in
+    create)
+        shift
+        run_create "$@"
+        ;;
+    delete)
+        shift
+        run_delete "$@"
+        ;;
+    reset)
+        shift
+        run_delete "$@" || true
+        run_create "$@"
+        ;;
+    restart)
+        shift
+        run_restart "$@"
+        ;;
+    code)
+        shift
+        run_code "$@"
+        ;;
+    *)
+        bail_with_usage
+        ;;
+esac
