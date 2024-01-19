@@ -23,3 +23,12 @@ mrlinuxctl reset [<machine>]
 mrlinuxctl restart [<machine>]
 mrlinuxctl code [-m <machine>] [-w|--wait] [-n|--new-window] [-r|--reuse-window] [path...]
 ```
+
+# Features
+
+- nix
+- nix caches
+- github integration where needed
+- vscode integration
+- automatic housekeeping
+- keep your personal and professional workspaces separate
