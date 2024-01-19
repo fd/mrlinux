@@ -121,6 +121,8 @@ function init_macos {
     # Restart the container to apply the changes
     orbctl restart "$containerName"
 
+    sleep 5
+
     # Install the Home Manager configuration
     ssh "$username@$containerName@orb" nix run github:mrhenry/home-manager \
         --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
