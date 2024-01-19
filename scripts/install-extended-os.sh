@@ -1,6 +1,11 @@
 set -e
 
-export NIX_CONFIG="experimental-features = nix-command flakes"
+read -r -d '' NIX_CONFIG << EOM
+experimental-features = nix-command flakes
+extra-substituters = https://alpha.pigeon-blues.ts.net/attic/release-public
+extra-trusted-public-keys = release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
+EOM
+export NIX_CONFIG="$NIX_CONFIG"
 
 # Take arguments from command line
 while [ "$#" -gt "0" ]; do
