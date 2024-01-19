@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+MRLINUX_FLAKE_REF="github:fd/mrlinux"
+MRHOME_FLAKE_REF="github:mrhenry/home-manager"
+MRNIX_CACHE_URL="https://alpha.pigeon-blues.ts.net/attic/release-public"
+MRNIX_CACHE_KEY="release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw="
+
 function collect_system_type {
     system="$(uname)"
 }
@@ -86,10 +91,19 @@ function init_linux {
     # Install the extended OS
     lxc exec "$containerName" -- nix run \
       --extra-experimental-features "nix-command flakes" \
-      --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-      --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
-      github:fd/mrlinux#install-extended-os \
-      -- --container-name "$containerName" --format "lxc" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+      --extra-substituters "$MRNIX_CACHE_URL" \
+      --extra-trusted-public-keys "$MRNIX_CACHE_KEY" \
+      "$MRLINUX_FLAKE_REF#install-extended-os" \
+      -- \
+      --mrlinux-flake-ref "$MRLINUX_FLAKE_REF" \
+      --mrlinux-cache-url "$MRNIX_CACHE_URL" \
+      --mrlinux-cache-key "$MRNIX_CACHE_KEY" \
+      --container-name "$containerName" \
+      --format "lxc" \
+      --username "$username" \
+      --uid "$uid" \
+      --gid "$gid" \
+      --ssh-keys "$sshKeys"
 
     # Restart the container to apply the changes
     lxc restart "$containerName"
@@ -100,9 +114,9 @@ function init_linux {
     done
 
     # Install the Home Manager configuration
-    ssh "$username@$(lxc_ip_address "$containerName")" nix run github:mrhenry/home-manager \
-        --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-        --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
+    ssh "$username@$(lxc_ip_address "$containerName")" nix run "$MRHOME_FLAKE_REF" \
+        --extra-substituters "$MRNIX_CACHE_URL" \
+        --extra-trusted-public-keys "$MRNIX_CACHE_KEY"
 }
 
 function init_macos {
@@ -113,10 +127,19 @@ function init_macos {
     # Install the extended OS
     orb run -m "$containerName" -u root nix run \
       --extra-experimental-features "nix-command flakes" \
-      --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-      --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw= \
-      github:fd/mrlinux#install-extended-os \
-      -- --container-name "$containerName" --format "orb" --username "$username" --uid "$uid" --gid "$gid" --ssh-keys "$sshKeys"
+      --extra-substituters "$MRNIX_CACHE_URL" \
+      --extra-trusted-public-keys "$MRNIX_CACHE_KEY" \
+      "$MRLINUX_FLAKE_REF#install-extended-os" \
+      -- \
+      --mrlinux-flake-ref "$MRLINUX_FLAKE_REF" \
+      --mrlinux-cache-url "$MRNIX_CACHE_URL" \
+      --mrlinux-cache-key "$MRNIX_CACHE_KEY" \
+      --container-name "$containerName" \
+      --format "lxc" \
+      --username "$username" \
+      --uid "$uid" \
+      --gid "$gid" \
+      --ssh-keys "$sshKeys"
     
     # Restart the container to apply the changes
     orbctl restart "$containerName"
@@ -124,9 +147,9 @@ function init_macos {
     sleep 5
 
     # Install the Home Manager configuration
-    ssh "$username@$containerName@orb" nix run github:mrhenry/home-manager \
-        --extra-substituters https://alpha.pigeon-blues.ts.net/attic/release-public \
-        --extra-trusted-public-keys release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
+    ssh "$username@$containerName@orb" nix run "$MRHOME_FLAKE_REF" \
+        --extra-substituters "$MRNIX_CACHE_URL" \
+        --extra-trusted-public-keys "$MRNIX_CACHE_KEY"
 }
 
 function run_create {

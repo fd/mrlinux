@@ -1,15 +1,21 @@
 set -e
 
-export NIX_CONFIG="$(cat <<-EOF
-experimental-features = nix-command flakes
-extra-substituters = https://alpha.pigeon-blues.ts.net/attic/release-public
-extra-trusted-public-keys = release-public:RLOvxX/CMLa6ffQ5oUDXA5zt/qjMN3u4z6GW+xZ1gWw=
-EOF
-)"
 
 # Take arguments from command line
 while [ "$#" -gt "0" ]; do
     case "$1" in
+        --mrlinux-flake-ref)
+            MRLINUX_FLAKE_REF="$2"
+            shift 2
+            ;;
+        --mrlinux-cache-url)
+            MRLINUX_CACHE_URL="$2"
+            shift 2
+            ;;
+        --mrlinux-cache-key)
+            MRLINUX_CACHE_KEY="$2"
+            shift 2
+            ;;
         --container-name)
             tmpl_containerName="$2"
             shift 2
@@ -41,11 +47,24 @@ while [ "$#" -gt "0" ]; do
     esac
 done
 
+# Make sure all the mrlinux settings are set
+if [ -z "$MRLINUX_FLAKE_REF" ] || [ -z "$MRLINUX_CACHE_URL" ] || [ -z "$MRLINUX_CACHE_KEY" ]; then
+    echo "Missing mrlinux settings" > /dev/stderr
+    exit 1
+fi
+
 # Make sure all required arguments are set
 if [ -z "$tmpl_containerName" ] || [ -z "$tmpl_format" ] || [ -z "$tmpl_username" ] || [ -z "$tmpl_uid" ] || [ -z "$tmpl_gid" ] || [ -z "$tmpl_sshKeys" ]; then
     echo "Missing required argument" > /dev/stderr
     exit 1
 fi
+
+export NIX_CONFIG="$(cat <<-EOF
+experimental-features = nix-command flakes
+extra-substituters = ${MRLINUX_CACHE_URL}
+extra-trusted-public-keys = ${MRLINUX_CACHE_KEY}
+EOF
+)"
 
 nixSystem="$(nix show-config | grep 'system =' | sed 's|system = ||')"
 mkdir -p /etc/nixos/modules
@@ -56,7 +75,7 @@ case "$tmpl_format" in
 cat <<EOF > /etc/nixos/flake.nix
 {
   inputs = {
-    mrlinux.url = "github:fd/mrlinux";
+    mrlinux.url = "$MRLINUX_FLAKE_REF";
   };
 
   outputs = { self, mrlinux }:
@@ -90,7 +109,7 @@ EOF
 cat <<EOF > /etc/nixos/flake.nix
 {
   inputs = {
-    mrlinux.url = "github:fd/mrlinux";
+    mrlinux.url = "$MRLINUX_FLAKE_REF";
   };
 
   outputs = { self, mrlinux }:
