@@ -3,7 +3,9 @@ nixpkgs.lib.nixosSystem {
   inherit pkgs;
   modules =
     [
-      ../../modules/lxc.nix
+      ({ modulesPath, ... }: {
+        imports = [ "${toString modulesPath}/virtualisation/lxc-container.nix" ];
+      })
       {
         system.stateVersion = "23.11";
       }

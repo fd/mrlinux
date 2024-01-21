@@ -3,13 +3,13 @@ nixpkgs.lib.nixosSystem {
   inherit pkgs;
   modules =
     [
-      ../../modules/lxc.nix
-      ../../modules/nix/housekeeping.nix
-      ../../modules/nix/settings.nix
-      ../../modules/non-nix-support/default.nix
-      ../../modules/developer.nix
-      ../../modules/basictools.nix
-      ../../modules/mrlinux/updater.nix
+      # Import the LXC container module
+      ({ modulesPath, ... }: {
+        imports = [ "${toString modulesPath}/virtualisation/lxc-container.nix" ];
+      })
+      # Import the Extended OS
+      ../../modules
+      # Import the Stack specific configuration
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 

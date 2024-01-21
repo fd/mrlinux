@@ -3,13 +3,10 @@ nixpkgs.lib.nixosSystem {
   inherit pkgs;
   modules =
     [
-      ../../modules/lxc.nix
-      ../../modules/nix/housekeeping.nix
-      ../../modules/nix/settings.nix
-      ../../modules/non-nix-support/default.nix
-      ../../modules/developer.nix
-      ../../modules/basictools.nix
-      ../../modules/mrlinux/updater.nix
+      ({ modulesPath, ... }: {
+        imports = [ "${toString modulesPath}/virtualisation/lxc-container.nix" ];
+      })
+      ../../modules
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
 
@@ -42,19 +39,6 @@ nixpkgs.lib.nixosSystem {
           enable = true;
           settings.PasswordAuthentication = false;
         };
-
-        virtualisation = {
-          podman = {
-            enable = true;
-
-            # Create a `docker` alias for podman, to use it as a drop-in replacement
-            dockerCompat = true;
-
-            # Required for containers under podman-compose to be able to talk to each other.
-            defaultNetwork.settings.dns_enabled = true;
-          };
-        };
-
       })
     ] ++ modules;
 }
