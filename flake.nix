@@ -61,7 +61,7 @@
           install-extended-os = pkgs.writeShellScriptBin "install-extended-os" (builtins.readFile ./scripts/install-extended-os.sh);
 
           dummy-extended-lxc = (self.lib.mrlinuxSystem {
-            format = "lxc";
+            stack = "lxc";
             system = system;
             modules = [
               {
@@ -79,7 +79,7 @@
           }).config.system.build.toplevel;
 
           dummy-extended-orb = (self.lib.mrlinuxSystem {
-            format = "orb";
+            stack = "orb";
             system = system;
             modules = [
               {
@@ -113,11 +113,11 @@
 
       }))
     // {
-      lib.mrlinuxSystem = { format, system, modules }:
-        assert (builtins.typeOf format) == "string";
+      lib.mrlinuxSystem = { stack, system, modules }:
+        assert (builtins.typeOf stack) == "string";
         assert (builtins.typeOf system) == "string";
         assert (builtins.typeOf modules) == "list";
-        import ./stacks/${format}/extended-os.nix {
+        import ./stacks/${stack}/extended-os.nix {
           inherit nixpkgs modules;
 
           pkgs = import nixpkgs {

@@ -99,7 +99,7 @@ function init_linux {
       --mrlinux-cache-url "$MRNIX_CACHE_URL" \
       --mrlinux-cache-key "$MRNIX_CACHE_KEY" \
       --container-name "$containerName" \
-      --format "lxc" \
+      --stack "lxc" \
       --username "$username" \
       --uid "$uid" \
       --gid "$gid" \
@@ -135,7 +135,7 @@ function init_macos {
       --mrlinux-cache-url "$MRNIX_CACHE_URL" \
       --mrlinux-cache-key "$MRNIX_CACHE_KEY" \
       --container-name "$containerName" \
-      --format "lxc" \
+      --stack "orb" \
       --username "$username" \
       --uid "$uid" \
       --gid "$gid" \

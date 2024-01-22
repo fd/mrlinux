@@ -12,6 +12,7 @@ nixpkgs.lib.nixosSystem {
       # Import the Stack specific configuration
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
+        mrlinux.stack = "orb";
 
         environment.variables = {
           GH_BROWSER = "x-www-browser";

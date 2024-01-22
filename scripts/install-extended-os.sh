@@ -19,8 +19,8 @@ while [ "$#" -gt "0" ]; do
             tmpl_containerName="$2"
             shift 2
             ;;
-        --format)
-            tmpl_format="$2"
+        --stack)
+            tmpl_stack="$2"
             shift 2
             ;;
         --username)
@@ -53,7 +53,7 @@ if [ -z "$MRLINUX_FLAKE_REF" ] || [ -z "$MRLINUX_CACHE_URL" ] || [ -z "$MRLINUX_
 fi
 
 # Make sure all required arguments are set
-if [ -z "$tmpl_containerName" ] || [ -z "$tmpl_format" ] || [ -z "$tmpl_username" ] || [ -z "$tmpl_uid" ] || [ -z "$tmpl_gid" ] || [ -z "$tmpl_sshKeys" ]; then
+if [ -z "$tmpl_containerName" ] || [ -z "$tmpl_stack" ] || [ -z "$tmpl_username" ] || [ -z "$tmpl_uid" ] || [ -z "$tmpl_gid" ] || [ -z "$tmpl_sshKeys" ]; then
     echo "Missing required argument" > /dev/stderr
     exit 1
 fi
@@ -68,7 +68,7 @@ EOF
 nixSystem="$(nix show-config | grep 'system =' | sed 's|system = ||')"
 mkdir -p /etc/nixos/modules
 
-case "$tmpl_format" in
+case "$tmpl_stack" in
     orb)
 
 cat <<EOF > /etc/nixos/flake.nix
@@ -80,7 +80,7 @@ cat <<EOF > /etc/nixos/flake.nix
   outputs = { self, mrlinux }:
     {
       nixosConfigurations.$tmpl_containerName = mrlinux.lib.mrlinuxSystem {
-        format = "orb";
+        stack = "orb";
         system = "$nixSystem";
 
         modules = [
@@ -114,7 +114,7 @@ cat <<EOF > /etc/nixos/flake.nix
   outputs = { self, mrlinux }:
     {
       nixosConfigurations.$tmpl_containerName = mrlinux.lib.mrlinuxSystem {
-        format = "lxc";
+        stack = "lxc";
         system = "$nixSystem";
 
         modules = [
@@ -131,7 +131,7 @@ EOF
 
         ;;
     *)
-        echo "Unsupported format: $tmpl_format" > /dev/stderr
+        echo "Unsupported stack: $tmpl_stack" > /dev/stderr
         exit 1
         ;;
 esac
