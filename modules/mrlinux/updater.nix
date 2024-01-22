@@ -1,6 +1,5 @@
 { pkgs, ... }:
 {
-
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "do-update-mrlinux"
       ''
@@ -9,5 +8,4 @@
         nixos-rebuild switch
       '')
   ];
-
 }

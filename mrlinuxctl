@@ -86,12 +86,7 @@ function init_linux {
         sleep 1
     done
 
-    # Reset SSH
-    ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$(lxc_ip_address "$containerName")"
-    # Tell ssh to trust the container
-    ssh-keyscan -H "$(lxc_ip_address "$containerName")" >> "$HOME/.ssh/known_hosts"
 
-    sleep 5
 
     # Install the extended OS
     lxc exec "$containerName" -- nix run \
@@ -117,6 +112,16 @@ function init_linux {
     while [[ -z "$(lxc_ip_address "$containerName")" ]]; do
         sleep 1
     done
+
+    # Wait for SSH to be available, while ignoring the host key
+    # while ! ssh -o StrictHostKeyChecking=no "$username@$(lxc_ip_address "$containerName")" true; do
+    #     sleep 1
+    # done
+
+    # Reset SSH
+    ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$(lxc_ip_address "$containerName")"
+    # Tell ssh to trust the container
+    ssh-keyscan -H "$(lxc_ip_address "$containerName")" >> "$HOME/.ssh/known_hosts"
 
     # Install the Home Manager configuration
     ssh "$username@$(lxc_ip_address "$containerName")" nix run "$MRHOME_FLAKE_REF" \

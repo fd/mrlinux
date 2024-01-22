@@ -1,4 +1,7 @@
 # Setup for Podman and Docker compat
+# 
+# We only do this for the LXC stack as the Orb stack 
+# already has docker.
 { pkgs, lib, config, ... }:
 {
   config = lib.mkIf (config.mrlinux.stack == "lxc") {

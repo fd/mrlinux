@@ -8,5 +8,6 @@
     ./mrlinux/updater.nix
     ./mrlinux/options.nix
     ./oci-containers.nix
+    ./nixos-containers.nix
   ];
 }
