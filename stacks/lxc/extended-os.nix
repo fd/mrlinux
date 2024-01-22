@@ -9,7 +9,7 @@ nixpkgs.lib.nixosSystem {
       ../../modules
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
-        mrlinux.stack = "orb";
+        mrlinux.stack = "lxc";
 
         # sudoers
         security.sudo.extraRules = [
