@@ -44,5 +44,15 @@ in
           This value should match the host.
         '';
     };
+
+    configPath = mkOption {
+      type = types.nonEmptyStr;
+      readOnly = true;
+      description =
+        ''
+          The path to the developer configuration diectory.
+          This value is set by the stack.
+        '';
+    };
   };
 }

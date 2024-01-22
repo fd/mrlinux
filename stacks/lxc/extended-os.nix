@@ -10,6 +10,7 @@ nixpkgs.lib.nixosSystem {
       ({ config, pkgs, ... }: {
         system.stateVersion = "23.11";
         mrlinux.stack = "lxc";
+        developer.configPath = "/home/${config.developer.username}/.config-mrlinux";
 
         # sudoers
         security.sudo.extraRules = [

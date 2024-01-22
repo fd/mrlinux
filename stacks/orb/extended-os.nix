@@ -14,6 +14,10 @@ nixpkgs.lib.nixosSystem {
         system.stateVersion = "23.11";
         mrlinux.stack = "orb";
 
+        # Set the developer's configuration path for mrlinux to the 
+        # macOS location so that some config can survive vm resets
+        developer.configPath = "/Users/${config.developer.username}/.config/mrlinux";
+
         environment.variables = {
           GH_BROWSER = "x-www-browser";
         };

@@ -72,9 +72,12 @@ function init_linux {
 
     nix run .#lxc-import-image || true
 
+    mkdir -p $HOME/.config/mrlinux
+
     lxc init mrlinux "$containerName" -c security.nesting=true -c security.privileged=true
     lxc config device add "$containerName" host-home disk source=$HOME path=/host$HOME shift=true readonly=true
     lxc config device add "$containerName" user-src disk source=$HOME/src path=$HOME/src shift=true
+    lxc config device add "$containerName" user-config disk source=$HOME/.config/mrlinux path=$HOME/.config-mrlinux shift=true
     
     lxc start "$containerName"
 
@@ -87,6 +90,8 @@ function init_linux {
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$(lxc_ip_address "$containerName")"
     # Tell ssh to trust the container
     ssh-keyscan -H "$(lxc_ip_address "$containerName")" >> "$HOME/.ssh/known_hosts"
+
+    sleep 5
 
     # Install the extended OS
     lxc exec "$containerName" -- nix run \
@@ -121,6 +126,8 @@ function init_linux {
 
 function init_macos {
     local containerName="$1"
+
+    mkdir -p $HOME/.config/mrlinux
 
     orbctl create nixos "$containerName"
 
