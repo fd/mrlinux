@@ -27,6 +27,10 @@ _None_
 This OS just includes the OrbStack provided configurations
 and leaves those unchanged.
 
+## Known issues
+
+- Running a `x86_64` guest on a `aarch64` host seems to be broken. (See: https://github.com/orbstack/orbstack/issues/54)
+
 ## Notes
 
 - OrbStack seems to run LXC containers as _machines_ in a VM

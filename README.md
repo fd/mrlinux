@@ -35,3 +35,4 @@ mrlinuxctl code [-m <machine>] [-w|--wait] [-n|--new-window] [-r|--reuse-window]
 - automatic housekeeping
 - keep your personal and professional workspaces separate
 - support OCI/Docker containers
+- support NixOS-containers/systemd-nspawn
