@@ -6,6 +6,8 @@
 4. `mrlinuxctl code <some project>`
 5. From a VS Code terminal, login to Github `gh auth login`
 
+For more information on the OrbStack setup read the [stack docs](./stacks/orb/README.md).
+
 # Getting Started on Linux
 
 1. Make sure LXD is installed and initialized.
@@ -32,3 +34,4 @@ mrlinuxctl code [-m <machine>] [-w|--wait] [-n|--new-window] [-r|--reuse-window]
 - vscode integration
 - automatic housekeeping
 - keep your personal and professional workspaces separate
+- support OCI/Docker containers

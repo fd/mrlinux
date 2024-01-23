@@ -1,7 +1,5 @@
 {
   containers.demo = {
-    bindMounts."/proc".hostPath = "/proc";
-    bindMounts."/sys".hostPath = "/sys";
     privateNetwork = true;
     hostAddress = "10.250.0.1";
     localAddress = "10.250.0.2";

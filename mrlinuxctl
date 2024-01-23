@@ -74,7 +74,11 @@ function init_linux {
 
     mkdir -p $HOME/.config/mrlinux
 
-    lxc init mrlinux "$containerName" -c security.nesting=true -c security.privileged=true
+    # Mimic OrbStack as much as possible
+    lxc init mrlinux "$containerName" \
+        -c security.nesting=true \
+        -c security.privileged=true \
+        -c raw.lxc=lxc.apparmor.profile=unconfined
     lxc config device add "$containerName" host-home disk source=$HOME path=/host$HOME shift=true readonly=true
     lxc config device add "$containerName" user-src disk source=$HOME/src path=$HOME/src shift=true
     lxc config device add "$containerName" user-config disk source=$HOME/.config/mrlinux path=$HOME/.config-mrlinux shift=true
@@ -114,9 +118,9 @@ function init_linux {
     done
 
     # Wait for SSH to be available, while ignoring the host key
-    # while ! ssh -o StrictHostKeyChecking=no "$username@$(lxc_ip_address "$containerName")" true; do
-    #     sleep 1
-    # done
+    while ! ssh -o StrictHostKeyChecking=no "$username@$(lxc_ip_address "$containerName")" true; do
+        sleep 1
+    done
 
     # Reset SSH
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$(lxc_ip_address "$containerName")"
